@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bilhete de Aventura Surpresa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Variáveis de Tema */
+:root {
+  --top: #A5E6E8;
+  --bottom: #F7E8C8;
+  --ink: #12405F;
+  --muted: #3F6F7D;
+  --panel: rgba(255, 255, 255, 0.85);
+  --line: rgba(18, 64, 95, 0.15);
+  --btn: #12405F;
+  --btn-hover: #1b5b87;
+  --btn-ink: #ffffff;
+  --coral: #E8505B;
+  --coral-hover: #f06a73;
+  --shadow: rgba(10, 50, 70, 0.15);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --top: #0B3A4C;
+    --bottom: #1B2A33;
+    --ink: #EAF7F9;
+    --muted: #A8CBD3;
+    --panel: rgba(255, 255, 255, 0.05);
+    --line: rgba(255, 255, 255, 0.15);
+    --btn: #EAF7F9;
+    --btn-hover: #cdebf0;
+    --btn-ink: #0B3A4C;
+    --shadow: rgba(0, 0, 0, 0.4);
+  }
+}
+
+/* Reset e Base Mobile First */
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  background: var(--bottom);
+  scroll-behavior: smooth;
+  overflow-x: clip;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: linear-gradient(180deg, var(--top), var(--bottom) 70%);
+  color: var(--ink);
+  font: 400 16px/1.5 Fredoka, "Trebuchet MS", system-ui, sans-serif;
+  padding: env(safe-area-inset-top, 0) 0 env(safe-area-inset-bottom, 0);
+  overflow-x: clip;
+}
+
+body.travado {
+  overflow: hidden;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+main {
+  width: min(1040px, 100%);
+  margin: 0 auto;
+  padding: 12px max(12px, env(safe-area-inset-right)) calc(56px + env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Botões UI/UX - Mobile First */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px; /* Touch target acessível */
+  padding: 0.7em 1.5em;
+  border: 0;
+  border-radius: 99px;
+  background: var(--btn);
+  color: var(--btn-ink);
+  font: 600 16px/1.2 inherit;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  width: 100%; /* Ocupa tudo no celular */
+}
+
+.btn:active {
+  transform: translateY(2px);
+}
+
+.btn.grande {
+  background: var(--coral);
+  color: #fff;
+  font-size: 20px;
+  padding: 0.8em 2.5em;
+  margin-top: 16px;
+  box-shadow: 0 4px 14px rgba(232, 80, 91, 0.4);
+}
+
+.btn, .link, summary {
+  touch-action: manipulation;
+}
+
+.btn:focus-visible, 
+.link:focus-visible, 
+summary:focus-visible {
+  outline: 3px solid #F59E0B;
+  outline-offset: 4px;
+}
+
+.link {
+  background: none;
+  border: 0;
+  padding: 12px;
+  color: var(--muted);
+  font: inherit;
+  font-weight: 500;
+  text-decoration: underline;
+  cursor: pointer;
+  min-height: 48px;
+  transition: color 0.2s;
+  width: 100%;
+}
+
+#intro .convite {
+  width: min(100%, 420px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#intro .btn {
+  max-width: 320px;
+}
+
+/* Tela de Introdução */
+#intro {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: max(24px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, var(--top), var(--bottom));
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: opacity 0.6s ease, visibility 0.6s;
+  overflow: auto;
+}
+
+#intro.saiu {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+#intro svg {
+  width: min(220px, 60vw);
+  height: auto;
+  animation: balanca 1.5s ease-in-out 0.2s 2;
+  filter: drop-shadow(0 10px 15px var(--shadow));
+}
+
+#intro p {
+  font-size: clamp(20px, 5vw, 26px);
+  font-weight: 500;
+  margin: 24px 0 12px;
+}
+
+@keyframes balanca {
+  0%, 100% { transform: rotate(0); }
+  25% { transform: rotate(-5deg); }
+  75% { transform: rotate(5deg); }
+}
+
+/* Container do Bilhete */
+.ticket-wrapper {
+  width: 100%;
+  max-width: 480px;
+  padding: 4px 0 0;
+  perspective: 1000px;
+  transition: height 0.7s cubic-bezier(.22, .8, .3, 1);
+}
+
+.ticket {
+  position: relative;
+  width: 100%;
+  aspect-ratio: var(--ticket-ratio, 900 / 3000);
+  filter: drop-shadow(0 10px 18px var(--shadow));
+  transform: none;
+  transition: transform 0.3s ease;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#bilhete {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 4% / 5%;
+}
+
+#raspe {
+  position: absolute;
+  left: var(--raspe-x, 6.4%);
+  top: var(--raspe-y, 24%);
+  width: var(--raspe-w, 87%);
+  height: var(--raspe-h, 14%);
+  border-radius: 16px;
+  touch-action: none;
+  cursor: pointer;
+  transition: opacity 0.8s ease;
+}
+
+#raspe.some {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Estados e Ações */
+.estado {
+  text-align: center;
+  font-size: clamp(17px, 4.4vw, 22px);
+  font-weight: 500;
+  margin: 18px auto 12px;
+  max-width: 34ch;
+  text-wrap: balance;
+  line-height: 1.4;
+  padding-inline: 4px;
+}
+
+.acoes {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 400px;
+  gap: 12px;
+  align-items: center;
+}
+
+.pill {
+  padding: 0.7em 1.2em;
+  border-radius: 99px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  font-weight: 500;
+  font-size: 16px;
+  text-align: center;
+  width: 100%;
+  line-height: 1.3;
+  text-wrap: balance;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+}
+
+/* Galeria — cada foto guarda a proporção original */
+#galeria {
+  margin-top: 36px;
+  width: 100%;
+}
+
+#galeria h2 {
+  font-size: clamp(22px, 5vw, 28px);
+  font-weight: 600;
+  text-align: center;
+  margin: 0 0 8px;
+}
+
+#galeria .lead {
+  text-align: center;
+  color: var(--muted);
+  font-size: clamp(15px, 3.6vw, 18px);
+  margin: 0 auto 28px;
+  max-width: 36ch;
+  text-wrap: balance;
+}
+
+#galeria-itens {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  align-items: start;
+  padding: 6px 0 0;
+}
+
+#galeria-itens figure {
+  margin: 0;
+  min-width: 0;
+  background: #fff;
+  padding: 8px 8px 12px;
+  border-radius: 3px;
+  box-shadow: 0 8px 18px rgba(10, 50, 70, 0.16);
+  transform: none;
+  transition: transform 0.3s ease;
+}
+
+#galeria-itens img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 2px;
+  background: #d7eef2;
+}
+
+#galeria-itens figcaption {
+  margin-top: 6px;
+  text-align: center;
+  color: #12405F;
+  font: 700 clamp(20px, 5.4vw, 28px)/1.15 Caveat, "Segoe Print", cursive;
+  overflow-wrap: anywhere;
+}
+
+/* Painel de Controle (Admin) */
+details {
+  margin-top: 40px;
+  width: 100%;
+  max-width: 600px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 4px 16px 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.04);
+}
+
+summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 18px;
+  padding: 16px 0;
+  min-height: 56px; /* Melhor área de toque */
+  display: flex;
+  align-items: center;
+  user-select: none;
+}
+
+details p {
+  color: var(--muted);
+  font-size: 15px;
+  margin: 4px 0 20px;
+  line-height: 1.5;
+}
+
+.botoes {
+  display: grid;
+  grid-template-columns: 1fr; /* Empilhado no celular */
+  gap: 12px;
+  padding-bottom: 16px;
+}
+
+#aviso {
+  min-height: 1.5em;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--coral);
+  text-align: center;
+  margin-top: 8px;
+}
+
+#conf {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 40;
+}
+
+@media (hover: hover) {
+  .btn:hover {
+    background: var(--btn-hover);
+    transform: translateY(-1px);
+  }
+  .btn.grande:hover {
+    background: var(--coral-hover);
+    box-shadow: 0 6px 20px rgba(232, 80, 91, 0.5);
+  }
+  .link:hover {
+    color: var(--ink);
+  }
+}
+
+#revelar {
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto;
+  text-align: center;
+}
+
+#revelar[hidden] {
+  display: none !important;
+}
+
+.depois {
+  width: 100%;
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.depois[hidden] {
+  display: none !important;
+}
+
+.depois > * {
+  opacity: 0;
+  transform: translateY(16px);
+}
+
+.depois.visivel > * {
+  animation: surge 0.55s ease forwards;
+}
+
+.depois.visivel > :nth-child(2) { animation-delay: 0.12s; }
+.depois.visivel > :nth-child(3) { animation-delay: 0.24s; }
+
+@keyframes surge {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Duas colunas de fotos quando já cabe um par legível */
+@media (min-width: 640px) {
+  .acoes {
+    flex-direction: row;
+    justify-content: center;
+    max-width: none;
+  }
+  .acoes .btn, .acoes .link, .pill {
+    width: auto;
+  }
+  #galeria {
+    margin-top: 48px;
+  }
+  #galeria-itens {
+    grid-template-columns: 1fr 1fr;
+    gap: 28px 22px;
+    padding: 12px 4px 4px;
+  }
+  #galeria-itens .foto-larga {
+    grid-column: 1 / -1;
+  }
+  #galeria-itens figure:nth-child(4n+2) { --tilt: -1.1deg; }
+  #galeria-itens figure:nth-child(4n+3) { --tilt: 1deg; }
+  #galeria-itens figure:nth-child(4n) { --tilt: -0.8deg; }
+  #galeria-itens figure:nth-child(4n+1) { --tilt: 0.6deg; }
+  #galeria-itens figure {
+    transform: rotate(var(--tilt, 0deg));
+    padding: 10px 10px 14px;
+  }
+  #galeria-itens .foto-larga {
+    --tilt: -0.3deg;
+  }
+}
+
+/* Pôster largo: o bilhete volta ao formato de paisagem */
+@media (min-width: 800px) {
+  body {
+    font-size: 18px;
+    background-attachment: fixed;
+  }
+  main {
+    padding: 28px 24px 80px;
+  }
+  .ticket-wrapper {
+    max-width: 900px;
+    padding: 10px;
+  }
+  .ticket {
+    aspect-ratio: var(--ticket-ratio, 1600 / 1240);
+    filter: drop-shadow(0 12px 24px var(--shadow));
+    transform: rotate(-0.5deg);
+  }
+  #raspe {
+    border-radius: 22px;
+  }
+  #intro svg {
+    width: 260px;
+  }
+  .botoes {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+  #galeria {
+    margin-top: 56px;
+  }
+  #galeria-itens {
+    gap: 36px 28px;
+  }
+  details {
+    margin-top: 64px;
+    padding: 8px 20px 20px;
+  }
+}
+
+@media (min-width: 800px) and (hover: hover) {
+  .ticket:hover {
+    transform: rotate(0deg) scale(1.01);
+  }
+}
+
+@media (min-width: 640px) and (hover: hover) {
+  #galeria-itens figure:hover {
+    --tilt: 0deg;
+    transform: rotate(0deg) translateY(-4px);
+    z-index: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  #galeria-itens figure,
+  .depois > * {
+    transform: none;
+    opacity: 1;
+    animation: none;
+  }
+}
+</style>
+</head>
+<body class="travado">
+
+<div id="intro">
+  <div class="convite">
+    <svg viewBox="0 0 220 150" role="img" aria-label="Envelope com um selo de coração">
+      <rect x="10" y="20" width="200" height="120" rx="10" fill="#FFF6E3" stroke="#12405F" stroke-width="3"/>
+      <path d="M12 26 L110 96 L208 26" fill="none" stroke="#12405F" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M12 136 L82 78 M208 136 L138 78" fill="none" stroke="#12405F" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="110" cy="94" r="17" fill="#E8505B"/>
+      <path d="M110 102 C100 95 98 88 103 85 C106 83 109 85 110 88 C111 85 114 83 117 85 C122 88 120 95 110 102Z" fill="#fff"/>
+    </svg>
+    <p>Bianca, chegou um bilhete para você.</p>
+    <button id="abrir" class="btn grande" type="button">Abrir o envelope</button>
+  </div>
+</div>
+
+<main>
+  <h1 class="sr-only">Bilhete de aventura surpresa para Bianca</h1>
+
+  <div class="ticket-wrapper">
+    <div class="ticket">
+      <canvas id="bilhete" role="img" aria-label="Bilhete de aventura surpresa para Bianca, de Geovanni. Raspe para descobrir o destino."></canvas>
+      <canvas id="raspe" aria-hidden="true"></canvas>
+    </div>
+  </div>
+
+  <p id="estado" class="estado" aria-live="polite">Passe o dedo para raspar e descobrir o destino.</p>
+  <button id="revelar" class="link" type="button">Revelar sem raspar</button>
+
+  <div id="depois" class="depois" hidden>
+  <div class="acoes">
+    <span id="contagem" class="pill"></span>
+  </div>
+
+  <section id="galeria" aria-label="Fotos da viagem">
+    <h2>Um gostinho do que vem por aí</h2>
+    <p class="lead">Praias, mirantes e os passeios que esperam por você.</p>
+    <div id="galeria-itens">
+      <figure class="foto-larga">
+        <img src="images/arraial-do-cabo.jpg" width="1640" height="860" alt="Escadaria de madeira entre cactos, descendo até a praia e o mar de Arraial do Cabo" decoding="async">
+        <figcaption>Arraial do Cabo</figcaption>
+      </figure>
+      <figure>
+        <img src="images/praia-forno.jpg" width="820" height="547" alt="Enseada da Praia do Forno vista do alto, com guarda-sóis, barcos e cactos no primeiro plano" loading="lazy" decoding="async">
+        <figcaption>Praia do Forno</figcaption>
+      </figure>
+      <figure>
+        <img src="images/praia-pontal.jpg" width="820" height="547" alt="Árvore na areia da Praia do Pontal, com o mar e o morro verde atrás" loading="lazy" decoding="async">
+        <figcaption>Praia do Pontal</figcaption>
+      </figure>
+      <figure>
+        <img src="images/praia-farol.jpg" width="820" height="547" alt="Barcos ancorados na água turquesa da Praia do Farol, com dunas e morros ao fundo" loading="lazy" decoding="async">
+        <figcaption>Praia do Farol</figcaption>
+      </figure>
+      <figure>
+        <img src="images/pontal-2.jpg" width="820" height="547" alt="Vista do alto do Pontal do Atalaia, com a praia, os barcos na baía e cactos em primeiro plano" loading="lazy" decoding="async">
+        <figcaption>Pontal do Atalaia</figcaption>
+      </figure>
+      <figure>
+        <img src="images/passeio-barco.png" width="1200" height="800" alt="Barco de passeio lotado em meio à água azul, com um bote ao lado" loading="lazy" decoding="async">
+        <figcaption>Passeio de barco</figcaption>
+      </figure>
+      <figure class="foto-quadrada">
+        <img src="images/buggy.jpg" width="1024" height="1023" alt="Buggy branco na areia, com três pessoas, de frente para o mar" loading="lazy" decoding="async">
+        <figcaption>Passeio de buggy</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <details id="painel">
+    <summary>Opções</summary>
+    <p>Baixe o bilhete em imagem para imprimir ou guardar.</p>
+    <div class="botoes">
+      <button id="png" class="btn" type="button">Baixar bilhete (PNG)</button>
+    </div>
+    <p id="aviso" aria-live="polite"></p>
+  </details>
+  </div>
+</main>
+
+<canvas id="conf" aria-hidden="true"></canvas>
+
+<script>
+(function(){
+const $ = s => document.querySelector(s);
+let W = 1600, H = 1240, modo = '';
+const cv = $('#bilhete');
+const g = cv.getContext('2d');
+
+const F = 'Fredoka, "Trebuchet MS", "Segoe UI", system-ui, sans-serif';
+const HAND = 'Caveat, "Segoe Print", "Comic Sans MS", cursive';
+const EMO = '"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+const NAVY = '#12405F', TEAL = '#1B8FB8', CORAL = '#E8505B';
+const CORES = ['#E8505B','#F59E0B','#F2C230','#2BB673','#1B9CC0','#7B5CD6','#E8579B'];
+const REG = {x:415, y:365, w:770, h:335};
+const LEG = ['Praia do Forno','Pontal do Atalaia'];
+const LEG_FOTO = ['Arraial do Cabo','Vem comigo?'];
+const DIAS = ['domingo','segunda','terça','quarta','quinta','sexta','sábado'];
+const CARTOES = [
+  {t:' Ônibus conforto', e:'🚌', c:'#1B8FB8', l:['Semi leito','Bordo completo','Ar-condicionado','Banheiro','Carregador de celular']},
+  {t:' Hospedagem', e:'🏨', c:'#D97706', l:['Pousada Tu y Mar','Ótima localização','Café da manhã','Piscina de furor','Quartos temáticos']},
+  {t:' Passeios', e:'⛵', c:'#1E9E62', l:['Passeio de barco','Passeio de buggy','Festa temática']},
+  {t:' Diversão', e:'🎉', c:'#7B5CD6', l:['Sorteios','Dinâmicas','Brincadeiras']}
+];
+
+const FOTOS_BILHETE = ['images/arraial-do-cabo.jpg', 'images/praia-pontal.jpg'];
+let imgs = [];
+
+function rr(x,y,w,h,r) { g.beginPath(); g.moveTo(x+r,y); g.arcTo(x+w,y,x+w,y+h,r); g.arcTo(x+w,y+h,x,y+h,r); g.arcTo(x,y+h,x,y,r); g.arcTo(x,y,x+w,y,r); g.closePath(); }
+function fit(t,max,size,weight,fam,min) { let s=size; min=min||16; while(s>min){ g.font=weight+' '+s+'px '+fam; if(g.measureText(t).width<=max) break; s--; } g.font=weight+' '+s+'px '+fam; return s; }
+function heart(cx,cy,s,c) { g.save(); g.translate(cx,cy); g.scale(s/40,s/40); g.beginPath(); g.moveTo(0,16); g.bezierCurveTo(-26,-2,-18,-24,0,-10); g.bezierCurveTo(18,-24,26,-2,0,16); g.closePath(); g.fillStyle=c; g.fill(); g.restore(); }
+function cover(im,x,y,w,h) { const s = Math.max(w/im.width, h/im.height), dw = im.width*s, dh = im.height*s; g.drawImage(im, x+(w-dw)/2, y+(h-dh)/2, dw, dh); }
+
+function seaPath() { g.beginPath(); g.moveTo(30,30); g.lineTo(470,30); g.bezierCurveTo(430,100,360,90,330,160); g.bezierCurveTo(300,230,210,220,170,290); g.bezierCurveTo(130,360,80,350,30,400); g.closePath(); }
+function leaf(x,y,len,deg,c1,c2) { g.save(); g.translate(x,y); g.rotate(deg*Math.PI/180);
+  g.beginPath(); g.moveTo(0,0); g.quadraticCurveTo(len*.5, -len*.2, len,0); g.quadraticCurveTo(len*.5, len*.2, 0,0); g.fillStyle=c1; g.fill();
+  g.strokeStyle=c2; g.lineWidth=4; g.lineCap='round'; g.beginPath(); g.moveTo(0,0); g.lineTo(len*.95,0); g.stroke();
+  g.lineWidth=3; for(let i=1; i<7; i++){ const px=len*i/7, d=len*.09*(1-i/8); g.beginPath(); g.moveTo(px,0); g.lineTo(px+len*.06, -d); g.moveTo(px,0); g.lineTo(px+len*.06, d); g.stroke(); }
+  g.restore(); }
+function shell(x,y,s,rot,c1,c2) { g.save(); g.translate(x,y); g.rotate(rot); g.scale(s,s);
+  const R=46, n=7, P = i => [R*Math.cos(Math.PI+i*Math.PI/n), 40+R*Math.sin(Math.PI+i*Math.PI/n)];
+  g.beginPath(); g.moveTo(0,40); const p0=P(0); g.lineTo(p0[0], p0[1]);
+  for(let i=0; i<n; i++){ const a=Math.PI+(i+.5)*Math.PI/n, p=P(i+1); g.quadraticCurveTo((R+16)*Math.cos(a), 40+(R+16)*Math.sin(a), p[0], p[1]); }
+  g.closePath(); g.fillStyle=c1; g.fill(); g.strokeStyle=c2; g.lineWidth=3; g.lineJoin='round'; g.stroke();
+  for(let i=1; i<n; i++){ const p=P(i); g.beginPath(); g.moveTo(0,40); g.lineTo(p[0]*.9, 40+(p[1]-40)*.9); g.stroke(); }
+  g.fillStyle=c2; g.beginPath(); g.moveTo(-12,40); g.lineTo(12,40); g.lineTo(8,54); g.lineTo(-8,54); g.closePath(); g.fill();
+  g.restore(); }
+function star(x,y,r,rot,c) { g.save(); g.translate(x,y); g.rotate(rot); g.beginPath();
+  for(let i=0; i<10; i++){ const rad = i%2 ? r*.42 : r, a = -Math.PI/2 + i*Math.PI/5; g.lineTo(rad*Math.cos(a), rad*Math.sin(a)); }
+  g.closePath(); g.fillStyle=c; g.strokeStyle=c; g.lineJoin='round'; g.lineWidth=r*.3; g.fill(); g.stroke();
+  g.fillStyle='rgba(255,255,255,.65)'; for(let i=0; i<5; i++){ const a = -Math.PI/2 + i*2*Math.PI/5; g.beginPath(); g.arc(r*.55*Math.cos(a), r*.55*Math.sin(a), r*.07, 0, 7); g.fill(); }
+  g.restore(); }
+
+function scene(x,y,w,h,v) {
+  const sky = g.createLinearGradient(0,y,0,y+h*.5); sky.addColorStop(0,'#7FD3F0'); sky.addColorStop(1,'#DFF6F8');
+  g.fillStyle=sky; g.fillRect(x,y,w,h);
+  g.fillStyle='#FFE08A'; g.beginPath(); g.arc(x+w*(v?.78:.2), y+h*.2, h*.08, 0, 7); g.fill();
+  g.fillStyle=v?'#5FA77A':'#7DBB7A'; g.beginPath(); g.moveTo(x, y+h*.5); g.quadraticCurveTo(x+w*.25, y+h*.3, x+w*.5, y+h*.46); g.quadraticCurveTo(x+w*.75, y+h*.36, x+w, y+h*.48); g.lineTo(x+w, y+h*.56); g.lineTo(x, y+h*.56); g.closePath(); g.fill();
+  const sea = g.createLinearGradient(0,y+h*.5, 0,y+h*.85); sea.addColorStop(0,'#2CC5D6'); sea.addColorStop(1,v?'#1A8FC0':'#7BE3D8');
+  g.fillStyle=sea; g.fillRect(x, y+h*.52, w, h*.36);
+  const yy = y+h*(v?.74:.8);
+  g.fillStyle='#F5DDA6'; g.beginPath(); g.moveTo(x, y+h*.86); g.quadraticCurveTo(x+w*.5, yy, x+w, y+h*.86); g.lineTo(x+w, y+h); g.lineTo(x, y+h); g.closePath(); g.fill();
+  g.strokeStyle='rgba(255,255,255,.85)'; g.lineWidth=4; g.beginPath(); g.moveTo(x, y+h*.86); g.quadraticCurveTo(x+w*.5, yy, x+w, y+h*.86); g.stroke();
+  if(v){ g.fillStyle='#fff'; g.beginPath(); g.moveTo(x+w*.3, y+h*.6); g.lineTo(x+w*.5, y+h*.6); g.lineTo(x+w*.46, y+h*.65); g.lineTo(x+w*.34, y+h*.65); g.closePath(); g.fill();
+    g.fillRect(x+w*.4, y+h*.5, 3, h*.1); g.fillStyle=CORAL; g.beginPath(); g.moveTo(x+w*.4+3, y+h*.5); g.lineTo(x+w*.4+w*.09, y+h*.57); g.lineTo(x+w*.4+3, y+h*.57); g.closePath(); g.fill(); }
+}
+function caixaPolaroid(w) {
+  const pad = 16, chin = 80, pw = w - pad * 2, ph = Math.round(pw * 2 / 3);
+  return { pad, chin, pw, ph, h: ph + pad + chin };
+}
+function polaroid(cx,cy,w,rot,slot) {
+  const b = caixaPolaroid(w), h = b.h;
+  g.save(); g.translate(cx,cy); g.rotate(rot);
+  g.shadowColor='rgba(20,60,80,.35)'; g.shadowBlur=24; g.shadowOffsetY=10;
+  g.fillStyle='#fff'; rr(-w/2,-h/2,w,h,10); g.fill();
+  g.shadowColor='transparent'; g.shadowBlur=0; g.shadowOffsetY=0;
+  const px=-w/2+b.pad, py=-h/2+b.pad, pw=b.pw, ph=b.ph, im=imgs[slot];
+  g.save(); rr(px,py,pw,ph,4); g.clip();
+  if(im) cover(im,px,py,pw,ph); else scene(px,py,pw,ph,slot%2);
+  g.restore();
+  g.fillStyle=NAVY; g.textAlign='center'; g.textBaseline='alphabetic';
+  fit(im?LEG_FOTO[slot]:LEG[slot], w-40, 44, '700', HAND, 28);
+  g.fillText(im?LEG_FOTO[slot]:LEG[slot], 0, h/2-28);
+  g.fillStyle='rgba(255,214,110,.88)'; g.save(); g.translate(0,-h/2); g.rotate(-.05); g.fillRect(-46,-14,92,30); g.restore();
+  g.restore();
+}
+function letras(str,cx,y,size,sp,off) {
+  g.font='700 '+size+'px '+F; g.textAlign='left'; g.textBaseline='alphabetic';
+  const ch = [...str], ws = ch.map(c=>g.measureText(c).width), tot = ws.reduce((a,b)=>a+b,0) + sp*(ch.length-1);
+  let x = cx - tot/2, k=0; g.lineJoin='round';
+  ch.forEach((c,i) => { if(c!==' '){ g.lineWidth=size*.13; g.strokeStyle='rgba(18,64,95,.28)'; g.strokeText(c,x+5,y+7); g.strokeStyle='#fff'; g.strokeText(c,x,y); g.fillStyle=CORES[(k+off)%CORES.length]; g.fillText(c,x,y); k++; } x += ws[i]+sp; });
+}
+function runs(list,cx,y,size) {
+  g.font='700 '+size+'px '+HAND; g.textAlign='left'; g.textBaseline='alphabetic';
+  const wd = r => r.h ? size*.95 : g.measureText(r.t).width, tot = list.reduce((a,r) => a+wd(r), 0);
+  let x = cx - tot/2; list.forEach(r => { if(r.h) heart(x+size*.47, y-size*.3, size*.8, CORAL); else{ g.fillStyle=r.c; g.fillText(r.t, x, y); } x += wd(r); });
+}
+function calendario(x,y) {
+  g.save(); g.shadowColor='rgba(20,60,80,.25)'; g.shadowBlur=10; g.shadowOffsetY=4; g.fillStyle='#fff'; rr(x,y,90,90,14); g.fill(); g.restore();
+  g.save(); rr(x,y,90,90,14); g.clip(); g.fillStyle=CORAL; g.fillRect(x,y,90,30); g.restore();
+  g.strokeStyle=CORAL; g.lineWidth=4; rr(x,y,90,90,14); g.stroke();
+  g.fillStyle='#fff'; g.textAlign='center'; g.font='700 21px '+F; g.fillText('NOV', x+45, y+23);
+  g.fillStyle=NAVY; g.font='700 42px '+F; g.fillText('13', x+45, y+72);
+}
+function cartoes() {
+  const n = CARTOES.length, gap = 22, x0 = 60, w = (1480 - gap*(n-1))/n, y0 = 880, h = 290;
+  g.textBaseline = 'alphabetic';
+  CARTOES.forEach((c,i) => { const x = x0 + i*(w+gap);
+    g.save(); g.shadowColor='rgba(20,60,80,.2)'; g.shadowBlur=14; g.shadowOffsetY=6; g.fillStyle='rgba(255,255,255,.94)'; rr(x,y0,w,h,26); g.fill(); g.restore();
+    g.save(); rr(x,y0,w,h,26); g.clip(); g.fillStyle=c.c; g.fillRect(x,y0,w,64); g.restore();
+    g.lineWidth=5; g.strokeStyle=c.c; rr(x,y0,w,h,26); g.stroke();
+    g.textAlign='left'; g.font='34px '+EMO; g.fillStyle='#fff'; g.fillText(c.e, x+18, y0+45);
+    fit(c.t, w-100, 32, '600', F, 22); g.fillStyle='#fff'; g.fillText(c.t, x+70, y0+43);
+    c.l.forEach((t,j) => { const ly = y0+112+j*40; g.fillStyle=c.c; g.beginPath(); g.arc(x+28, ly-9, 6, 0, 7); g.fill();
+      fit(t, w-58, 30, '400', F, 22); g.fillStyle=NAVY; g.fillText(t, x+46, ly); });
+  });
+}
+
+const CARD = { head: 88, title: 44, line: 46, step: 62, first: 168, tail: 52, gap: 20, x: 40, w: 820 };
+function alturaCard(n) { return CARD.first + Math.max(0, n - 1) * CARD.step + CARD.tail; }
+let layoutE = null;
+
+function medirEstreito() {
+  W = 900;
+  const polW = 400, gap = 28, margem = (W - polW * 2 - gap) / 2;
+  const polH = caixaPolaroid(polW).h;
+  const polTop = 356;
+  const polCy = polTop + polH / 2;
+  REG.x = 48; REG.w = W - 96; REG.h = 440;
+  REG.y = Math.round(polCy + polH / 2 + 28);
+  const dateY = REG.y + REG.h + 36;
+  const cardsY = dateY + 196;
+  const heights = CARTOES.map(c => alturaCard(c.l.length));
+  const cardsH = heights.reduce((a, b) => a + b, 0) + CARD.gap * (heights.length - 1);
+  H = cardsY + cardsH + 44;
+  layoutE = { polW, polH, polCy, margem, dateY, cardsY, heights };
+}
+
+function cartaoEstreito(c, x, y, w, h) {
+  g.save(); g.shadowColor='rgba(20,60,80,.2)'; g.shadowBlur=14; g.shadowOffsetY=6;
+  g.fillStyle='rgba(255,255,255,.94)'; rr(x,y,w,h,22); g.fill(); g.restore();
+  g.save(); rr(x,y,w,h,22); g.clip(); g.fillStyle=c.c; g.fillRect(x,y,w,CARD.head); g.restore();
+  g.lineWidth=5; g.strokeStyle=c.c; rr(x,y,w,h,22); g.stroke();
+  g.textAlign='left'; g.textBaseline='alphabetic';
+  g.font='44px '+EMO; g.fillStyle='#fff'; g.fillText(c.e, x+20, y+58);
+  fit(c.t, w-108, CARD.title, '600', F, 28); g.fillStyle='#fff'; g.fillText(c.t, x+78, y+56);
+  c.l.forEach((t,j) => {
+    const ly = y + CARD.first + j * CARD.step;
+    g.fillStyle=c.c; g.beginPath(); g.arc(x+30, ly-12, 7, 0, 7); g.fill();
+    fit(t, w-78, CARD.line, '400', F, 30); g.fillStyle=NAVY; g.fillText(t, x+50, ly);
+  });
+}
+
+function desenharEstreito() {
+  const L = layoutE;
+  g.save(); rr(22,22,W-44,H-44,36); g.clip();
+  const bg = g.createLinearGradient(0,0,0,H); bg.addColorStop(0,'#FFF9EC'); bg.addColorStop(1,'#FBE9C6');
+  g.fillStyle=bg; g.fillRect(0,0,W,H);
+  g.setLineDash([10,9]); g.strokeStyle='rgba(180,140,80,.45)'; g.lineWidth=3; rr(34,34,W-68,H-68,28); g.stroke(); g.setLineDash([]);
+  g.save(); g.scale(.5,.5); seaPath();
+  g.lineJoin='round'; g.strokeStyle='#F0D29B'; g.lineWidth=56; g.stroke(); g.strokeStyle='#fff'; g.lineWidth=22; g.stroke(); g.fillStyle='#3CC7D2'; g.fill();
+  g.restore();
+  [[120,150,'#2E9E5B','#1F7A46'],[108,130,'#1F7A46','#166237'],[140,170,'#3BB46B','#1F7A46']].forEach(a => leaf(W-8, 16, a[1], a[0], a[2], a[3]));
+  g.textBaseline='alphabetic'; g.textAlign='center';
+  const linha = (t, y, size, cor) => {
+    const s = fit(t, W-120, size, '700', F, 34);
+    g.font='700 '+s+'px '+F; g.textAlign='center'; g.lineJoin='round'; g.lineWidth=Math.max(8, s*.16);
+    g.strokeStyle='#fff'; g.strokeText(t, W/2, y); g.fillStyle=cor; g.fillText(t, W/2, y);
+  };
+  linha('Bilhete de', 150, 58, TEAL);
+  linha('aventura surpresa!', 224, 52, '#F08A0B');
+  const dedicacao = [{t:'Para: ',c:NAVY},{t:'Bianca',c:'#0F7C99'},{h:1},{t:'  De: ',c:NAVY},{t:'Geovanni',c:'#0F7C99'}];
+  let ds = 52;
+  while (ds > 32) {
+    g.font='700 '+ds+'px '+HAND;
+    const wd = r => r.h ? ds*.95 : g.measureText(r.t).width;
+    if (dedicacao.reduce((a,r)=>a+wd(r),0) <= W-80) break;
+    ds -= 2;
+  }
+  runs(dedicacao, W/2, 308, ds);
+  polaroid(L.margem + L.polW/2, L.polCy, L.polW, -.045, 0);
+  polaroid(W - L.margem - L.polW/2, L.polCy, L.polW, .045, 1);
+  const sz = fit('ARRAIAL', REG.w-36, 112, '700', F, 72);
+  letras('ARRAIAL', W/2, REG.y + REG.h*0.4, sz, 2, 0);
+  letras('DO CABO', W/2, REG.y + REG.h*0.76, sz, 2, 2);
+  if (pronto) {
+    const dt = '13 a 15 de novembro', cal = 108;
+    g.font='700 50px '+F; let dts = 50;
+    while (dts > 32 && g.measureText(dt).width > W - cal - 140) { dts -= 2; g.font='700 '+dts+'px '+F; }
+    const tw = g.measureText(dt).width, tot = cal + 18 + tw, sx = (W - tot) / 2;
+    g.save(); g.translate(sx, L.dateY); g.scale(cal/90, cal/90); calendario(0, 0); g.restore();
+    g.fillStyle=NAVY; g.textAlign='left'; g.textBaseline='alphabetic'; g.font='700 '+dts+'px '+F;
+    g.fillText(dt, sx+cal+18, L.dateY + cal*0.72);
+    g.textAlign='center'; g.fillStyle='#3F6F7D'; g.font='700 44px '+HAND;
+    g.fillText('de '+DIAS[new Date(2026,10,13).getDay()]+' a '+DIAS[new Date(2026,10,15).getDay()], W/2, L.dateY+cal+52);
+    let y = L.cardsY;
+    CARTOES.forEach((c,i) => { cartaoEstreito(c, CARD.x, y, CARD.w, L.heights[i]); y += L.heights[i] + CARD.gap; });
+  }
+  g.restore();
+  const furoY = REG.y + REG.h/2;
+  g.save(); g.globalCompositeOperation='destination-out'; g.beginPath(); g.arc(20, furoY, 24, 0, 7); g.arc(W-20, furoY, 24, 0, 7); g.fill(); g.restore();
+}
+
+function desenhar() {
+  g.setTransform(1,0,0,1,0,0); g.globalCompositeOperation='source-over'; g.clearRect(0,0,W,H);
+  if (modo === 'estreito') { desenharEstreito(); return; }
+  g.save(); rr(30,30,W-60,H-60,44); g.clip();
+  const bg = g.createLinearGradient(0,0,0,H); bg.addColorStop(0,'#FFF9EC'); bg.addColorStop(1,'#FBE9C6'); g.fillStyle=bg; g.fillRect(0,0,W,H);
+  g.setLineDash([12,10]); g.strokeStyle='rgba(180,140,80,.45)'; g.lineWidth=3; rr(44,44,W-88,H-88,34); g.stroke(); g.setLineDash([]);
+  seaPath(); g.lineJoin='round'; g.strokeStyle='#F0D29B'; g.lineWidth=56; g.stroke(); g.strokeStyle='#fff'; g.lineWidth=22; g.stroke(); g.fillStyle='#3CC7D2'; g.fill();
+  g.strokeStyle='#9CEBEF'; g.lineWidth=6; g.lineCap='round';
+  [[70,90],[150,60],[90,170],[230,110],[120,250]].forEach(p => { g.beginPath(); g.moveTo(p[0],p[1]); g.quadraticCurveTo(p[0]+18, p[1]-14, p[0]+36, p[1]); g.quadraticCurveTo(p[0]+54, p[1]+14, p[0]+72, p[1]); g.stroke(); });
+  [[100,260,'#2E9E5B','#1F7A46'],[92,210,'#1F7A46','#166237'],[125,290,'#2E9E5B','#1F7A46'],[150,240,'#3BB46B','#1F7A46'],[172,235,'#1F7A46','#166237']].forEach(a => leaf(W-30, 30, a[2]?a[1]:0, a[0], a[2], a[3]));
+  g.textBaseline='alphabetic'; g.textAlign='left';
+  const t1='Bilhete de ', t2='aventura surpresa!';
+  fit(t1+t2, 880, 70, '700', F, 40); const w1=g.measureText(t1).width, w2=g.measureText(t2).width; let tx=800-(w1+w2)/2;
+  g.lineJoin='round'; g.lineWidth=12; g.strokeStyle='#fff'; g.strokeText(t1, tx, 140); g.strokeText(t2, tx+w1, 140);
+  g.fillStyle=TEAL; g.fillText(t1, tx, 140); g.fillStyle='#F08A0B'; g.fillText(t2, tx+w1, 140);
+  runs([{t:'Para: ',c:NAVY},{t:'Bianca',c:'#0F7C99'},{h:1},{t:'  De: ',c:NAVY},{t:'Geovanni',c:'#0F7C99'}], 800, 238, 72);
+  polaroid(235, 500, 330, -.1, 0);
+  polaroid(1365, 500, 330, .09, 1);
+  const sz = fit('ARRAIAL', 730, 165, '700', F, 100);
+  letras('ARRAIAL', 800, 500, sz, 4, 0); letras('DO CABO', 800, 665, sz, 4, 2);
+  if (pronto) {
+    g.font='700 64px '+F; const dt='13 a 15 de novembro', ds=fit(dt, 700, 64, '700', F, 40), tw=g.measureText(dt).width, tot=90+26+tw, sx=800-tot/2;
+    calendario(sx, 742); g.fillStyle=NAVY; g.textAlign='left'; g.fillText(dt, sx+116, 803);
+    g.textAlign='center'; g.fillStyle='#3F6F7D'; g.font='700 40px '+HAND; g.fillText('de '+DIAS[new Date(2026,10,13).getDay()]+' a '+DIAS[new Date(2026,10,15).getDay()], 800, 852);
+    shell(110, 735, 1.25, -.3, '#F7A8B8', '#D9667F'); shell(190, 790, .8, .4, '#FFD9A0', '#D9963B');
+    star(1470, 770, 48, .3, '#F59E0B');
+    cartoes();
+  }
+  g.restore();
+  const furoDesktop = pronto ? H / 2 : REG.y + REG.h / 2;
+  g.save(); g.globalCompositeOperation='destination-out'; g.beginPath(); g.arc(30, furoDesktop, 36, 0, 7); g.arc(W-30, furoDesktop, 36, 0, 7); g.fill(); g.restore();
+}
+
+const sc = $('#raspe'), sg = sc.getContext('2d'); sc.width = REG.w; sc.height = REG.h;
+let riscou = false, pronto = false, ultimo = null, moves = 0;
+
+function pintarRaspe() {
+  const w = sc.width, h = sc.height; sg.globalCompositeOperation='source-over';
+  const gr = sg.createLinearGradient(0,0,w,h); gr.addColorStop(0,'#C7D2D8'); gr.addColorStop(.5,'#E4EBEE'); gr.addColorStop(1,'#B9C6CD');
+  sg.fillStyle=gr; sg.fillRect(0,0,w,h);
+  sg.strokeStyle='rgba(255,255,255,.4)'; sg.lineWidth=Math.max(6, h*0.025); for(let i=-h; i<w; i+=Math.max(28, h*0.1)){ sg.beginPath(); sg.moveTo(i,h); sg.lineTo(i+h,0); sg.stroke(); }
+  sg.fillStyle='#4F6670'; sg.textAlign='center'; sg.textBaseline='alphabetic';
+  let ts = Math.round(h * 0.2);
+  sg.font='700 '+ts+'px '+F;
+  while (ts > 28 && sg.measureText('Raspe aqui').width > w*0.86) { ts -= 2; sg.font='700 '+ts+'px '+F; }
+  sg.fillText('Raspe aqui', w/2, h*0.46);
+  const sub = 'e descubra o destino da aventura';
+  let ss = Math.round(h * 0.09);
+  sg.font='500 '+ss+'px '+F;
+  while (ss > 18 && sg.measureText(sub).width > w*0.9) { ss -= 1; sg.font='500 '+ss+'px '+F; }
+  sg.fillText(sub, w/2, h*0.46 + ts*0.72);
+}
+
+function espessura() {
+  const rect = sc.getBoundingClientRect();
+  if (!rect.width) return sc.width * 0.1;
+  const px = Math.min(42, Math.max(30, rect.width * 0.11));
+  return px * sc.width / rect.width;
+}
+
+function ponto(e) {
+  const r = sc.getBoundingClientRect();
+  return [ (e.clientX - r.left) * sc.width / r.width, (e.clientY - r.top) * sc.height / r.height ];
+}
+
+function raspar(e) {
+  const p = ponto(e);
+  sg.globalCompositeOperation = 'destination-out'; sg.lineCap = 'round'; sg.lineJoin = 'round'; sg.lineWidth = espessura(); sg.beginPath();
+  if(ultimo) { sg.moveTo(ultimo[0], ultimo[1]); } else { sg.moveTo(p[0], p[1]); }
+  sg.lineTo(p[0] + 0.01, p[1]); sg.stroke(); ultimo = p; riscou = true;
+  if(++moves % 12 === 0) checar();
+}
+
+function checar() {
+  if(pronto) return;
+  const d = sg.getImageData(0,0,sc.width,sc.height).data;
+  let t = 0, z = 0;
+  for(let i=3; i<d.length; i+=64){ t++; if(d[i]<40) z++; }
+  if(z/t > 0.5) revelar();
+}
+
+sc.addEventListener('pointerdown', e => { ultimo = null; sc.setPointerCapture(e.pointerId); sc.dataset.d='1'; raspar(e); });
+sc.addEventListener('pointermove', e => { if(sc.dataset.d==='1') raspar(e); });
+['pointerup','pointercancel'].forEach(ev => sc.addEventListener(ev, () => { sc.dataset.d=''; ultimo=null; checar(); }));
+
+function confete() {
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const c = $('#conf'), x = c.getContext('2d'); c.width = innerWidth; c.height = innerHeight;
+  const cores = CORES.concat(['#ffffff']);
+  const P = Array.from({length: 150}, () => ({ x: innerWidth/2 + (Math.random()-.5)*200, y: innerHeight*.45, vx: (Math.random()-.5)*16, vy: -Math.random()*16-4, s: 6+Math.random()*8, r: Math.random()*6, vr: (Math.random()-.5)*.3, c: cores[Math.random()*cores.length|0] }));
+  let t = 0;
+  (function f(){
+    x.clearRect(0,0,c.width,c.height);
+    P.forEach(p => { p.vy+=.35; p.x+=p.vx; p.y+=p.vy; p.r+=p.vr; p.vx*=.99; x.save(); x.translate(p.x,p.y); x.rotate(p.r); x.fillStyle=p.c; x.fillRect(-p.s/2,-p.s/3,p.s,p.s*.6); x.restore(); });
+    if(++t < 180) requestAnimationFrame(f); else x.clearRect(0,0,c.width,c.height);
+  })();
+}
+
+const ROTULO = 'Bilhete de aventura surpresa. Para Bianca, de Geovanni. Destino: Arraial do Cabo, de 13 a 15 de novembro. Inclui ônibus semi leito com serviço de bordo, hospedagem na Pousada Tu y Mar com café da manhã e piscina, passeio de barco, passeio de buggy e festa temática.';
+
+function revelar() {
+  if(pronto) return;
+  pronto = true;
+  const wrapper = $('.ticket-wrapper');
+  const antes = wrapper.offsetHeight;
+  const reduzido = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  wrapper.style.transition = 'none';
+  wrapper.style.overflow = 'hidden';
+  wrapper.style.height = antes + 'px';
+  if (modo === 'estreito') medirEstreito();
+  else { W = 1600; H = 1240; REG.x = 415; REG.y = 365; REG.w = 770; REG.h = 335; }
+  cv.width = W; cv.height = H;
+  syncRaspe();
+  desenhar();
+  sc.classList.add('some');
+  $('#revelar').hidden = true;
+  $('#estado').textContent = 'Arraial do Cabo, de 13 a 15 de novembro. Feliz aniversário, Bianca!';
+  cv.setAttribute('aria-label', ROTULO);
+  const depois = $('#depois');
+  let abriu = false;
+  const abrirDepois = () => {
+    if (abriu) return;
+    abriu = true;
+    depois.hidden = false;
+    depois.classList.add('visivel');
+    wrapper.style.height = '';
+    wrapper.style.overflow = '';
+    wrapper.style.transition = '';
+  };
+  if (reduzido) abrirDepois();
+  else {
+    const destino = $('.ticket').offsetWidth * H / W;
+    wrapper.offsetHeight;
+    wrapper.style.transition = '';
+    wrapper.style.overflow = 'hidden';
+    requestAnimationFrame(() => { wrapper.style.height = destino + 'px'; });
+    wrapper.addEventListener('transitionend', abrirDepois, { once: true });
+    setTimeout(abrirDepois, 900);
+  }
+  confete();
+}
+
+$('#revelar').addEventListener('click', revelar);
+$('#abrir').addEventListener('click', () => { $('#intro').classList.add('saiu'); document.body.classList.remove('travado'); });
+
+function meiaNoite(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+function atualizarContagem() {
+  const hoje = meiaNoite(new Date());
+  const ini = new Date(2026, 10, 13);
+  const ultimo = new Date(2026, 10, 15);
+  const dias = Math.round((ini - hoje) / 86400000);
+  const el = $('#contagem');
+  if (dias > 1) el.textContent = 'Faltam ' + dias + ' dias para a aventura';
+  else if (dias === 1) el.textContent = 'Falta 1 dia para a aventura';
+  else if (hoje <= ultimo) el.textContent = 'A aventura já começou!';
+  else el.textContent = 'Que aventura foi essa!';
+}
+function agendarContagem() {
+  const agora = new Date();
+  const proxima = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate() + 1, 0, 0, 1);
+  setTimeout(() => { atualizarContagem(); agendarContagem(); }, proxima - agora);
+}
+atualizarContagem();
+agendarContagem();
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') atualizarContagem(); });
+
+function aviso(t) { $('#aviso').textContent = t; }
+function carregarBilhete() {
+  return Promise.all(FOTOS_BILHETE.map(src => new Promise(resolve => {
+    const im = new Image();
+    im.onload = () => resolve(im);
+    im.onerror = () => resolve(null);
+    im.src = src;
+  }))).then(lista => { imgs = lista; desenhar(); });
+}
+function baixar(url, nome) { const a = document.createElement('a'); a.href = url; a.download = nome; document.body.appendChild(a); a.click(); a.remove(); }
+$('#png').addEventListener('click', () => { baixar(cv.toDataURL('image/png'), 'bilhete-arraial-do-cabo.png'); aviso('PNG gerado. Imprima em papel mais grosso.'); });
+
+function syncRaspe() {
+  const ticket = $('.ticket');
+  ticket.style.setProperty('--ticket-ratio', W + ' / ' + H);
+  sc.width = REG.w; sc.height = REG.h;
+  sc.style.left = (REG.x / W * 100) + '%';
+  sc.style.top = (REG.y / H * 100) + '%';
+  sc.style.width = (REG.w / W * 100) + '%';
+  sc.style.height = (REG.h / H * 100) + '%';
+}
+function encurtar() {
+  H = Math.round(REG.y + REG.h + (modo === 'estreito' ? 78 : 100));
+}
+function configurar() {
+  modo = matchMedia('(max-width: 799px)').matches ? 'estreito' : 'largo';
+  if (modo === 'estreito') medirEstreito();
+  else { W = 1600; H = 1240; REG.x = 415; REG.y = 365; REG.w = 770; REG.h = 335; }
+  if (!pronto) encurtar();
+  cv.width = W; cv.height = H;
+  syncRaspe();
+  desenhar();
+  const wrapper = $('.ticket-wrapper');
+  wrapper.style.height = '';
+  wrapper.style.overflow = '';
+  if (pronto) sc.classList.add('some');
+  else pintarRaspe();
+}
+configurar(); carregarBilhete();
+const fontes = Promise.all([document.fonts.load('700 80px Fredoka'), document.fonts.load('600 32px Fredoka'), document.fonts.load('400 30px Fredoka'), document.fonts.load('700 60px Caveat')]).catch(()=>{});
+Promise.race([fontes, new Promise(r => setTimeout(r, 3000))]).then(() => { desenhar(); if(!riscou && !pronto){ sg.clearRect(0,0,sc.width,sc.height); pintarRaspe(); } });
+matchMedia('(max-width: 799px)').addEventListener('change', () => {
+  if (!pronto) { riscou = false; moves = 0; ultimo = null; }
+  configurar();
+});
+})();
+</script>
+</body>
+</html>
